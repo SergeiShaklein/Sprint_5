@@ -1,25 +1,22 @@
 # Проверка функциональности раздела «Конструктор»
-
+import pytest
 from locators import Locators
 from tests.conftest import driver
 
 
-class TestCheckConstructor: # проверяем переход на раздел Соусы
-    def test_check_crossing_souse(self, driver):
-        driver.find_element(*Locators.link_construction).click() # переходим в конструктор
-        driver.find_element(*Locators.inscription_souse).click() # выбираем Соусы
-
-        assert driver.find_element(*Locators.inscription_souse).is_displayed() and driver.find_element(*Locators.active_element_constructor).text == "Соусы"
-
-    def test_check_crossing_filling(self, driver): # проверяем переход на раздел Начинки
+@pytest.mark.parametrize("section, inscription", [
+    (Locators.inscription_souse, "Соусы"),
+    (Locators.inscription_filling, "Начинки"),
+    (Locators.inscription_bread, "Булки"),
+])
+class TestCheckConstructor:
+    def test_check_crossing_sections(self, driver, section, inscription):
         driver.find_element(*Locators.link_construction).click()  # переходим в конструктор
-        driver.find_element(*Locators.inscription_filling).click()  # выбираем Начинки
 
-        assert driver.find_element(*Locators.inscription_filling).is_displayed() and driver.find_element(*Locators.active_element_constructor).text == "Начинки"
+        if section == Locators.inscription_bread:
+            driver.find_element(*Locators.inscription_souse).click()  # выбираем Соусы перед Булками
 
-    def test_check_crossing_bread(self, driver): # проверяем переход на раздел Булки
-        driver.find_element(*Locators.link_construction).click()  # переходим в конструктор
-        driver.find_element(*Locators.inscription_filling).click()  # выбираем Начинки
-        driver.find_element(*Locators.inscription_bread).click()  # выбираем Булки
+        driver.find_element(*section).click()  # выбираем нужный раздел
 
-        assert driver.find_element(*Locators.inscription_bread).is_displayed() and driver.find_element(*Locators.active_element_constructor).text == "Булки"
+        assert driver.find_element(*section).is_displayed() and driver.find_element(
+            *Locators.active_element_constructor).text == inscription
